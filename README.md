@@ -58,11 +58,11 @@ services:
     security_opt:
       - seccomp:unconfined #optional
     environment:
-      - CUSTOM_USER=     #Replace username
-      - PASSWORD=    #Replace password
+      - CUSTOM_USER=admin     #Replace username
+      - PASSWORD=abcd1234    #Replace password
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/London
+      - TZ=Asia/Bangkok
       - CHROME_CLI=https://github.com/0xmoei #optional
     volumes:
       - /root/chromium/config:/config
