@@ -41,7 +41,7 @@ cd chromium
 
 **2. Create `docker-compose.yaml` file**
 ```
-nano docker-compose.yaml
+nano generate-compose.sh
 ```
 
 **3. Paste the following code in it**
@@ -50,35 +50,49 @@ nano docker-compose.yaml
 * `CHROME_CLI`: The main page when you open browser
 * `ports`: You can replace `3010` & `3011` if they have conflict
 ```
----
-services:
-  chromium:
+#!/bin/bash
+
+NUM_CONTAINERS=10  # thay số lượng container tại đây
+
+echo "version: '3'" > docker-compose.gen.yml
+echo "services:" >> docker-compose.gen.yml
+
+for i in $(seq 1 $NUM_CONTAINERS); do
+  PORT1=$((3000 + i * 10))
+  PORT2=$((3001 + i * 10))
+
+  cat <<EOF >> docker-compose.gen.yml
+  chromium_$i:
     image: lscr.io/linuxserver/chromium:latest
-    container_name: chromium
+    container_name: chromium_$i
     security_opt:
-      - seccomp:unconfined #optional
+      - seccomp:unconfined
     environment:
-      - CUSTOM_USER=admin     #Replace username
-      - PASSWORD=abcd1234    #Replace password
+      - CUSTOM_USER=admin
+      - PASSWORD=abcd1234
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Bangkok
-      - CHROME_CLI=https://github.com/Hoanghienvi #optional
+      - CHROME_CLI=https://github.com/Hoanghienvi
     volumes:
-      - /root/chromium/config:/config
+      - /root/chromium/config_$i:/config
     ports:
-      - 3010:3000   #Change 3010 to your favorite port if needed
-      - 3011:3001   #Change 3011 to your favorite port if needed
+      - "$PORT1:3000"
+      - "$PORT2:3001"
     shm_size: "1gb"
     restart: unless-stopped
+
+EOF
+done
+
 ```
 > To save and exit: `Ctrl+X+Y+Enter` 
 
 ## Run Chromium
 ```console
-cd $HOME && cd chromium
-
-docker compose up -d
+chmod +x generate-compose.sh
+./generate-compose.sh
+docker compose -f docker-compose.gen.yml up -d
 ```
 **The application can be accessed by going to one of these addresses in your local PC browser**
 * http://Server_IP:3010/
